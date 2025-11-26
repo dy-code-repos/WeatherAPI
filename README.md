@@ -88,4 +88,4 @@ OR
 python src/test_api.py## Project Structure
 
 ## Answers
-### For Answers and Deployment: see the [Answers](answers/ANSWERS.md) and [Deployment](answers/DEPLOYMENT.md)
+### For Answers and Deployment: see the [Answers](answers/ANSWERS.md) 
