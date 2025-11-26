@@ -1,33 +1,6 @@
 # Corteva Weather API
 
 A REST API for accessing weather and crop yield data, built with Flask and PostgreSQL.
-## Data Modeling
-- To store weather data per station
-
-```
-CREATE TABLE IF NOT EXISTS weather_data (
-    record_date DATE NOT NULL,
-    max_temp NUMERIC,
-    min_temp NUMERIC,
-    precipitation NUMERIC,
-    weather_station CHAR(11) NOT NULL,
-    PRIMARY KEY (record_date, weather_station
-    )
-    
-```
-- To store yearly weather stats
-
-```
- CREATE TABLE IF NOT EXISTS weather_stats (
-    weather_station CHAR(11) NOT NULL,
-    record_year SMALLINT   NOT NULL,
-    avg_min_temp NUMERIC,
-    avg_max_temp NUMERIC,
-    avg_precipitation NUMERIC,
-    PRIMARY KEY (record_year, weather_station)
-    ); 
-```
-
 
 
 ## Features
@@ -114,5 +87,5 @@ OR
 
 python src/test_api.py## Project Structure
 
-## Deplyment
-### For Deployment Answers : see the [Answer README](answers/README.md)
+## Answers
+### For Answers and Deployment: see the [Answers](ANSWERS.md) and [Deployment](DEPLOYMENT.md)
