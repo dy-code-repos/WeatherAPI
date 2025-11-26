@@ -1,6 +1,34 @@
 # Corteva Weather API
 
 A REST API for accessing weather and crop yield data, built with Flask and PostgreSQL.
+## Data Modeling
+- To store weather data per station
+
+```
+CREATE TABLE IF NOT EXISTS weather_data (
+    record_date DATE NOT NULL,
+    max_temp NUMERIC,
+    min_temp NUMERIC,
+    precipitation NUMERIC,
+    weather_station CHAR(11) NOT NULL,
+    PRIMARY KEY (record_date, weather_station
+    )
+    
+```
+- To store yearly weather stats
+
+```
+ CREATE TABLE IF NOT EXISTS weather_stats (
+    weather_station CHAR(11) NOT NULL,
+    record_year SMALLINT   NOT NULL,
+    avg_min_temp NUMERIC,
+    avg_max_temp NUMERIC,
+    avg_precipitation NUMERIC,
+    PRIMARY KEY (record_year, weather_station)
+    ); 
+```
+
+
 
 ## Features
 
@@ -16,23 +44,16 @@ A REST API for accessing weather and crop yield data, built with Flask and Postg
 - Docker and Docker Compose (for containerized deployment)
 - OR Python 3.9+ and PostgreSQL (for local development)
 
-## Quick Start with Docker
+## Quick Start with Docker 
 
 1. **Clone the repository**
+   ``` 
    git clone <repository-url>
-   cd code-challenge-template
-   2. **Start services**
+   cd WeatherAPI
+2. **Start services**
+   ```
    docker-compose up -d
-   3. **Initialize database and load data**
-   # Initialize tables
-   docker-compose exec api python -c "from src.data_modeling import get_db_connection, initialize_tables; conn = get_db_connection(); initialize_tables(conn); conn.close()"
-   
-   # Load weather data
-   docker-compose exec api python src/data_wrangling.py
-   
-   # Calculate statistics
-   docker-compose exec api python -c "from src.data_modeling import get_db_connection, calculate_weather_stats; conn = get_db_connection(); calculate_weather_stats(conn); conn.close()"
-   4. **Access the API**
+4. **Access the API**
    - API: http://localhost:8081
    - Swagger Docs: http://localhost:8081/api/docs
    - Health Check: http://localhost:8081/health
@@ -42,27 +63,11 @@ A REST API for accessing weather and crop yield data, built with Flask and Postg
 1. **Install dependencies**
    pip install -r requirements.txt
    2. **Configure database**
-   - Copy `.env.example` to `.env` and update values
-   - OR create `src/config.ini` with database credentials
+   - replace values in `src/config.ini` with your database credentials
 
-3. **Initialize database**
-   
-   from src.data_modeling import get_db_connection, initialize_tables
-   conn = get_db_connection()
-   initialize_tables(conn)
-   conn.close()
-   4. **Load data**
-   
-   python src/data_wrangling.py
-   5. **Calculate statistics**thon
-   from src.data_modeling import get_db_connection, calculate_weather_stats
-   conn = get_db_connection()
-   calculate_weather_stats(conn)
-   conn.close()
-   6. **Run server**h
+2. **Run server**h
    python src/server.py
-   # OR with gunicorn for production
-   gunicorn -c gunicorn_config.py src.server:app
+  
    ## API Endpoints
 
 ### GET /api/weather
@@ -75,7 +80,8 @@ Retrieve weather data with optional filtering.
 - `limit` (optional): Records per page (default: 1000)
 
 **Example:**
-curl "http://localhost:8081/api/weather?station_id=USC00110072&limit=10"### GET /api/weather/stats
+curl "http://localhost:8081/api/weather?station_id=USC00110072&limit=10"
+### GET /api/weather/stats
 Retrieve annual weather statistics.
 
 **Query Parameters:**
@@ -85,7 +91,9 @@ Retrieve annual weather statistics.
 - `limit` (optional): Records per page (default: 500)
 
 **Example:**
-curl "http://localhost:8081/api/weather/stats?year=2010&limit=10"### GET /api/yield
+curl "http://localhost:8081/api/weather/stats?year=2010&limit=10"
+
+### GET /api/yield
 Retrieve crop yield data.
 
 **Query Parameters:**
