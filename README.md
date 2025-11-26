@@ -107,6 +107,9 @@ Health check endpoint.
 ## Testing
 
 Run unit tests:
+
 python -m pytest src/test_api.py
-# OR
+
+OR
+
 python src/test_api.py## Project Structure
