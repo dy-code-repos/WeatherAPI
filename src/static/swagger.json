@@ -1,0 +1,566 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Corteva Weather API",
+    "description": "REST API for accessing weather and crop yield data. Provides endpoints to query weather observations, annual weather statistics, and crop yield information with filtering and pagination support.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Corteva API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081",
+      "description": "Local development server"
+    },
+    {
+      "url": "http://localhost:5000",
+      "description": "Alternative local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Weather",
+      "description": "Weather data endpoints"
+    },
+    {
+      "name": "Yield",
+      "description": "Crop yield data endpoints"
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoint"
+    }
+  ],
+  "paths": {
+    "/api/weather": {
+      "get": {
+        "tags": ["Weather"],
+        "summary": "Get weather data",
+        "description": "Retrieve weather data with optional filtering by station ID and date. Supports pagination. Temperatures are returned in degrees Celsius and precipitation in centimeters.",
+        "operationId": "getWeatherData",
+        "parameters": [
+          {
+            "name": "station_id",
+            "in": "query",
+            "description": "Filter by weather station ID (e.g., USC00112140)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "USC00112140"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Filter by specific date in YYYY-MM-DD format",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2020-01-15"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Page number (1-indexed). Used for pagination.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of records per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1000,
+              "example": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherDataResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "record_date": "2020-01-15",
+                      "max_temp": 5.5,
+                      "min_temp": -2.3,
+                      "precipitation": 0.0,
+                      "weather_station": "USC00112140"
+                    },
+                    {
+                      "record_date": "2020-01-16",
+                      "max_temp": 7.2,
+                      "min_temp": -1.1,
+                      "precipitation": 0.5,
+                      "weather_station": "USC00112140"
+                    }
+                  ],
+                  "count": 2,
+                  "offset": 1,
+                  "limit": 1000
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "offset must be >= 1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weather/stats": {
+      "get": {
+        "tags": ["Weather"],
+        "summary": "Get weather statistics",
+        "description": "Retrieve aggregated annual weather statistics per station. Calculates average temperatures and total precipitation for each station-year combination. Temperatures are in degrees Celsius and precipitation in centimeters.",
+        "operationId": "getWeatherStats",
+        "parameters": [
+          {
+            "name": "station_id",
+            "in": "query",
+            "description": "Filter by weather station ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "USC00112140"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Filter by specific year",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 2020
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Page number (1-indexed)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of records per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 500,
+              "example": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherStatsResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "weather_station": "USC00112140",
+                      "record_year": 2020,
+                      "avg_min_temp": 2.5,
+                      "avg_max_temp": 15.3,
+                      "avg_precipitation": 45.2
+                    }
+                  ],
+                  "count": 1,
+                  "offset": 1,
+                  "limit": 500
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/yield": {
+      "get": {
+        "tags": ["Yield"],
+        "summary": "Get yield data",
+        "description": "Retrieve crop yield data with optional filtering by year. Supports pagination.",
+        "operationId": "getYieldData",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Filter by specific year",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 2020
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Page number (1-indexed)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of records per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 5,
+              "example": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YieldDataResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "record_year": 2020,
+                      "total_yield": 172000000
+                    },
+                    {
+                      "record_year": 2019,
+                      "total_yield": 136000000
+                    }
+                  ],
+                  "count": 2,
+                  "offset": 1,
+                  "limit": 5
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Check if the API is running and healthy",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "healthy"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WeatherRecord": {
+        "type": "object",
+        "properties": {
+          "record_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the weather record",
+            "example": "2020-01-15"
+          },
+          "max_temp": {
+            "type": "number",
+            "format": "float",
+            "description": "Maximum temperature in degrees Celsius",
+            "nullable": true,
+            "example": 5.5
+          },
+          "min_temp": {
+            "type": "number",
+            "format": "float",
+            "description": "Minimum temperature in degrees Celsius",
+            "nullable": true,
+            "example": -2.3
+          },
+          "precipitation": {
+            "type": "number",
+            "format": "float",
+            "description": "Precipitation in centimeters",
+            "nullable": true,
+            "example": 0.0
+          },
+          "weather_station": {
+            "type": "string",
+            "description": "Weather station identifier",
+            "example": "USC00112140"
+          }
+        },
+        "required": ["record_date", "weather_station"]
+      },
+      "WeatherStatsRecord": {
+        "type": "object",
+        "properties": {
+          "weather_station": {
+            "type": "string",
+            "description": "Weather station identifier",
+            "example": "USC00112140"
+          },
+          "record_year": {
+            "type": "integer",
+            "description": "Year of the statistics",
+            "example": 2020
+          },
+          "avg_min_temp": {
+            "type": "number",
+            "format": "float",
+            "description": "Average minimum temperature in degrees Celsius",
+            "nullable": true,
+            "example": 2.5
+          },
+          "avg_max_temp": {
+            "type": "number",
+            "format": "float",
+            "description": "Average maximum temperature in degrees Celsius",
+            "nullable": true,
+            "example": 15.3
+          },
+          "avg_precipitation": {
+            "type": "number",
+            "format": "float",
+            "description": "Total precipitation in centimeters",
+            "nullable": true,
+            "example": 45.2
+          }
+        },
+        "required": ["weather_station", "record_year"]
+      },
+      "YieldRecord": {
+        "type": "object",
+        "properties": {
+          "record_year": {
+            "type": "integer",
+            "description": "Year of the yield record",
+            "example": 2020
+          },
+          "total_yield": {
+            "type": "integer",
+            "description": "Total crop yield",
+            "example": 172000000
+          }
+        },
+        "required": ["record_year", "total_yield"]
+      },
+      "WeatherDataResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeatherRecord"
+            },
+            "description": "Array of weather records"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "example": 2
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Page number (1-indexed)",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of records per page",
+            "example": 1000
+          }
+        },
+        "required": ["data", "count", "offset", "limit"]
+      },
+      "WeatherStatsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeatherStatsRecord"
+            },
+            "description": "Array of weather statistics records"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "example": 1
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Page number (1-indexed)",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of records per page",
+            "example": 500
+          }
+        },
+        "required": ["data", "count", "offset", "limit"]
+      },
+      "YieldDataResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/YieldRecord"
+            },
+            "description": "Array of yield records"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "example": 2
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Page number (1-indexed)",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of records per page",
+            "example": 5
+          }
+        },
+        "required": ["data", "count", "offset", "limit"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Health status",
+            "example": "healthy"
+          }
+        },
+        "required": ["status"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "offset must be >= 1"
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  }
+}
