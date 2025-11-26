@@ -55,6 +55,18 @@ CREATE TABLE IF NOT EXISTS weather_data (
 ## REST API
 - Used Flask to create REST APIs
 - First, it will create all tables and insert the date
-- Note: Since it is inserting data first, it might take a few seconds to start serving the API 
+- Note: Since it is inserting data first, it might take a few seconds to start serving the API
+
+# Deployment
+
+- The current project is fully Dockerized, enabling the application image to be pushed to Amazon ECR and seamlessly deployed on Amazon ECS.
+
+- The application uses Gunicorn as the production-grade WSGI server, allowing Flask to run with multiple workers for improved concurrency, reliability, and failure handling.
+
+- For scalability and high availability, PostgreSQL can be hosted on Amazon RDS with a Multi-AZ setup, while the Flask API can be deployed on ECS behind an Application Load Balancer (ALB) and API gateway, or alternatively on Amazon EKS.
+
+- For data ingestion, weather stations can upload files to Amazon S3. An S3 event trigger will invoke an AWS Lambda function, which processes, cleans, and loads the data into RDS.
+
+- To automate provisioning and ensure consistent deployments, an AWS CloudFormation template can be used to create and manage all infrastructure components—improving maintainability and reducing operational overhead.
 
 
