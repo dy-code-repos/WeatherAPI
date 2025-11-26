@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS weather_data (
 2. **Run server**h
    python src/server.py
   
-   ## API Endpoints
+## API Endpoints
 
 ### GET /api/weather
 Retrieve weather data with optional filtering.
